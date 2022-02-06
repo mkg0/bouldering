@@ -3,7 +3,7 @@
 # Installation
 
 ```
-go get github.com/mkg0/bouldering-auto-book
+go install github.com/mkg0/bouldering-auto-book@latest
 ```
 
 # Usage
