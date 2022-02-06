@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	selectable "bouldering-auto-book/internal/golang-selectable-table"
+	selectable "github.com/mkg0/bouldering-auto-book/internal/golang-selectable-table"
 
 	"github.com/fatih/color"
 	"github.com/golang-module/carbon/v2"
