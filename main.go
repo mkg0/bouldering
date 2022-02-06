@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/mkg0/bouldering-auto-book/internal/persist"
+	"github.com/mkg0/bouldering/internal/persist"
 )
 
 func main() {

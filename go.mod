@@ -1,4 +1,4 @@
-module github.com/mkg0/bouldering-auto-book
+module github.com/mkg0/bouldering
 
 go 1.17
 

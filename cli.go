@@ -6,7 +6,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/mkg0/bouldering-auto-book/internal/persist"
+	"github.com/mkg0/bouldering/internal/persist"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/fatih/color"
