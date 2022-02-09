@@ -17,3 +17,5 @@ bouldering profile remove
 bouldering book
 bouldering auto-book
 ```
+
+[![asciicast](https://asciinema.org/a/HuQxtB0RHvBM5GFjk2UKXuuzd.svg)](https://asciinema.org/a/HuQxtB0RHvBM5GFjk2UKXuuzd)
