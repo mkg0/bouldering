@@ -3,6 +3,7 @@ package selectable
 import (
 	"bufio"
 	"os"
+	"syscall"
 
 	"github.com/eiannone/keyboard"
 	"github.com/fatih/color"
@@ -106,6 +107,9 @@ func readKey(t *Table) {
 			break
 		} else if key == keyboard.KeyEsc {
 			t.selected = [][]int{}
+			break
+		} else if key == keyboard.KeyCtrlC {
+			syscall.Kill(syscall.Getpid(), syscall.SIGINT)
 			break
 		}
 	}
