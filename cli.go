@@ -149,7 +149,7 @@ func runCli() {
 						Usage: "list the existing profiles",
 						Action: func(c *cli.Context) error {
 							if len(global.Profiles) == 0 {
-								fmt.Println("No profile yet. Add one with 'bouldering profile add'")
+								errorOutput.Println("No profile yet. Add one with 'bouldering profile add'")
 								return nil
 							}
 							for _, profile := range global.Profiles {
