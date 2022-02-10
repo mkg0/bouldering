@@ -62,7 +62,7 @@ func askSlot(slots []Slot, start, end carbon.Carbon, isAutoMode bool) []Slot {
 	// }
 
 	//add rows to table
-	for colIndex := 0; colIndex < len(table[2]); colIndex++ {
+	for colIndex := 0; colIndex < len(getLongestArr(table)); colIndex++ {
 		var cols []selectable.Cell
 		for rowIndex := 0; rowIndex < colCount; rowIndex++ {
 			isOutRange := rowIndex > len(table)-1 || colIndex > len(table[rowIndex])-1
