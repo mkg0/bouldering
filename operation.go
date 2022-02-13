@@ -68,7 +68,10 @@ var qs = []*survey.Question{
 }
 
 func fetch(url string, response interface{}) {
-	resp, err := http.Get(url)
+	client := http.Client{}
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36")
+	resp, err := client.Do(req)
 	if err != nil {
 		panic(err)
 	}
