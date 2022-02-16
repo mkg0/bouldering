@@ -17,6 +17,16 @@ func getCarbonFromUnix(unixMilliDate int64) carbon.Carbon {
 	return carbon.Time2Carbon(time.UnixMilli(unixMilliDate))
 }
 
+func printTableOnResize(t *selectable.Table) {
+	listener, _ := tsize.NewSizeListener()
+	for {
+		s := <-listener.Change
+		t.Width = s.Width
+		t.Height = s.Height
+		t.RePrint()
+	}
+}
+
 func askSlot(slots []Slot, start, end carbon.Carbon, isAutoMode bool) []Slot {
 	s, _ := tsize.GetSize()
 	t := selectable.Table{
@@ -28,6 +38,8 @@ func askSlot(slots []Slot, start, end carbon.Carbon, isAutoMode bool) []Slot {
 		HeaderColor:   color.New(color.FgHiWhite).Add(color.Bold).Add(color.Underline),
 		Multiple:      isAutoMode,
 	}
+	go printTableOnResize(&t)
+
 	var table [][]Slot = [][]Slot{}
 
 	colCount := int(start.DiffInDays(end)) + 1
