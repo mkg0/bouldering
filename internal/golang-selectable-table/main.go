@@ -49,7 +49,7 @@ func (t *Table) isSelected(rowIndex, colIndex int) bool {
 }
 
 func (t *Table) Run() [][]int {
-	go print(t)
+	go printTable(t)
 	readKey(t)
 
 	return t.selected
@@ -79,16 +79,16 @@ func readKey(t *Table) {
 		_, key, _ := keyboard.GetKey()
 		if key == keyboard.KeyArrowDown {
 			t.activeRow = min(len(t.rows)-1, t.activeRow+1)
-			go print(t)
+			go printTable(t)
 		} else if key == keyboard.KeyArrowUp {
 			t.activeRow = max(0, t.activeRow-1)
-			go print(t)
+			go printTable(t)
 		} else if key == keyboard.KeyArrowLeft {
 			t.activeCol = max(0, t.activeCol-1)
-			go print(t)
+			go printTable(t)
 		} else if key == keyboard.KeyArrowRight {
 			t.activeCol = min(len(t.cols)-1, t.activeCol+1)
-			go print(t)
+			go printTable(t)
 		} else if key == keyboard.KeySpace {
 			col := t.rows[t.activeRow][t.activeCol]
 			if col.Disabled {
@@ -102,7 +102,7 @@ func readKey(t *Table) {
 				s := sliceIndex(len(t.selected), func(i int) bool { return t.selected[i][0] == t.activeRow && t.selected[i][1] == t.activeCol })
 				t.selected = append(t.selected[:s], t.selected[s+1:]...)
 			}
-			go print(t)
+			go printTable(t)
 		} else if key == keyboard.KeyEnter {
 			break
 		} else if key == keyboard.KeyEsc {
@@ -123,4 +123,8 @@ func sliceIndex(limit int, predicate func(i int) bool) int {
 		}
 	}
 	return -1
+}
+
+func (t *Table) RePrint() {
+	printTable(t)
 }

@@ -13,13 +13,23 @@ var disabledColor = color.New(color.FgHiWhite, color.Faint)
 // var disabledSelectedColor = color.New(color.FgWhite, color.Faint, color.Bold)
 var disabledSelectedColor = color.New(color.FgWhite, color.Faint, color.Bold, color.BgHiBlack)
 
-func print(t *Table) {
-	colWidth := math.Round(float64(t.Width / len(t.cols)))
+func appendCellContent(content string, colWidth int, color *color.Color) string {
+	var output = ""
+	if len(content) > int(colWidth) {
+		output = output + color.Sprint(content[:colWidth-1]+" ")
+	} else {
+		output = output + color.Sprint(content)
+	}
+	output = output + color.Sprint(strings.Repeat(" ", int(math.Max(0, float64(int(colWidth)-len(content))))))
+	return output
+}
+
+func printTable(t *Table) {
+	colWidth := math.Max(10, math.Round(float64(t.Width/len(t.cols))))
 	var output string
 	//header
 	for _, label := range t.cols {
-		output = output + t.HeaderColor.Sprint(label)
-		output = output + t.HeaderColor.Sprint(strings.Repeat(" ", int(colWidth)-len(label)))
+		output = output + appendCellContent(label, int(colWidth), t.HeaderColor)
 	}
 	output = output + t.HeaderColor.Sprintln("")
 
@@ -44,9 +54,7 @@ func print(t *Table) {
 			} else if cell.Disabled == true {
 				marker = disabledColor
 			}
-
-			output = output + marker.Sprint(cell.Content)
-			output = output + marker.Sprint(strings.Repeat(" ", int(colWidth)-len(cell.Content)))
+			output = output + appendCellContent(cell.Content, int(colWidth), marker)
 		}
 		output = output + t.NormalColor.Sprintln("")
 	}
