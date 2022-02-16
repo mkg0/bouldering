@@ -1,13 +1,13 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -172,10 +172,17 @@ func notify(slots []Slot, gym BoulderStudio) {
 
 func (gym *BoulderStudio) bookSingle(profile Profile, slot Slot) bool {
 	var shiftSelector = fmt.Sprintf(`[[0,null,true],%v,%v,%v,%v,%v,%v,%v,"%s"]`, gym.shiftModelId, slot.Selector[2].(float64), slot.Selector[3].(float64), slot.Selector[4].(float64), slot.Selector[5].(float64), int(slot.Selector[6].(float64)), int(slot.Selector[7].(float64)), slot.Selector[8].(string)) // fuck it
-	var jsonStr = []byte(fmt.Sprintf(`{"clientId":%[1]v,"shiftModelId":%[2]v,"shiftSelector":%[12]s,"desiredDate":null,"dateOfBirthString":"%[3]s","streetAndHouseNumber":"%[4]s","postalCode":"%[5]s","city":"%[6]s","phoneMobile":"%[7]s","type":"booking","participants":[{"isBookingPerson":true,"tariffId":%[13]v,"dateOfBirthString":"%[3]v","firstName":"%[8]s","lastName":"%[9]s","email":"%[10]s","additionalFieldValue":"%[11]s","dateOfBirth":"%[3]v"}],"firstName":"%[8]s","lastName":"%[9]s","email":"%[10]s","dateOfBirth":"%[3]v","wantsNewsletter":false}`, gym.clientId, gym.shiftModelId, profile.DateOfBirth, profile.Address, profile.PostCode, profile.City, profile.Phone, profile.Name, profile.Surname, profile.Email, profile.USCid, shiftSelector, gym.tariffId))
-	fmt.Println(string(jsonStr))
-	// return
-	response, _ := http.Post("https://backend.dr-plano.com/bookable", "application/json", bytes.NewBuffer(jsonStr))
+	var jsonStr = fmt.Sprintf(`{"clientId":%[1]v,"shiftModelId":%[2]v,"shiftSelector":%[12]s,"desiredDate":null,"dateOfBirthString":"%[3]s","streetAndHouseNumber":"%[4]s","postalCode":"%[5]s","city":"%[6]s","phoneMobile":"%[7]s","type":"booking","participants":[{"isBookingPerson":true,"tariffId":%[13]v,"dateOfBirthString":"%[3]v","firstName":"%[8]s","lastName":"%[9]s","email":"%[10]s","additionalFieldValue":"%[11]s","dateOfBirth":"%[3]v"}],"firstName":"%[8]s","lastName":"%[9]s","email":"%[10]s","dateOfBirth":"%[3]v","wantsNewsletter":false}`, gym.clientId, gym.shiftModelId, profile.DateOfBirth, profile.Address, profile.PostCode, profile.City, profile.Phone, profile.Name, profile.Surname, profile.Email, profile.USCid, shiftSelector, gym.tariffId)
+	fmt.Println(jsonStr)
+	client := http.Client{}
+	req, _ := http.NewRequest("POST", "https://backend.dr-plano.com/bookable", strings.NewReader(jsonStr))
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36")
+	response, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer response.Body.Close()
 	var res map[string]interface{}
 	json.NewDecoder(response.Body).Decode((&res))
 	return response.StatusCode == 200
