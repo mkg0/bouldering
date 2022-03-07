@@ -35,7 +35,7 @@ var qs = []*survey.Question{
 	},
 	{
 		Name:     "Address",
-		Prompt:   &survey.Input{Message: "Address?"},
+		Prompt:   &survey.Input{Message: "Address? (Annenstrasse 12)"},
 		Validate: survey.Required,
 	},
 	{
@@ -51,7 +51,7 @@ var qs = []*survey.Question{
 	},
 	{
 		Name:     "Phone",
-		Prompt:   &survey.Input{Message: "Phone?"},
+		Prompt:   &survey.Input{Message: "Phone? (0491779680000)"},
 		Validate: survey.Required,
 	},
 	{
@@ -166,16 +166,30 @@ func runCommand(command string) {
 func notify(slots []Slot, gym BoulderStudio) {
 	runCommand("clear")
 	time := getCarbonFromUnix(slots[0].DateList[0].Start).Format("l(M j) H:i", carbon.Berlin) + "-" + getCarbonFromUnix(slots[0].DateList[0].End).Format("H:i", carbon.Berlin)
-	successOutput.Printf("Booked %s on %s\n", gym.name, time)
+	if slots[0].State == "NOT_YET_BOOKABLE" {
+		successOutput.Printf("Scheduled an auto booking %s on %s\n", gym.name, time)
+	} else {
+		successOutput.Printf("Booked %s on %s\n", gym.name, time)
+	}
 	color.New(color.FgGreen).Println("Enjoy your climbing...")
 }
 
-func (gym *BoulderStudio) bookSingle(profile Profile, slot Slot) bool {
+func (gym *BoulderStudio) bookSingle(profile Profile, slot Slot, local bool) bool {
 	var shiftSelector = fmt.Sprintf(`[[0,null,true],%v,%v,%v,%v,%v,%v,%v,"%s"]`, gym.shiftModelId, slot.Selector[2].(float64), slot.Selector[3].(float64), slot.Selector[4].(float64), slot.Selector[5].(float64), int(slot.Selector[6].(float64)), int(slot.Selector[7].(float64)), slot.Selector[8].(string)) // fuck it
 	var jsonStr = fmt.Sprintf(`{"clientId":%[1]v,"shiftModelId":%[2]v,"shiftSelector":%[12]s,"desiredDate":null,"dateOfBirthString":"%[3]s","streetAndHouseNumber":"%[4]s","postalCode":"%[5]s","city":"%[6]s","phoneMobile":"%[7]s","type":"booking","participants":[{"isBookingPerson":true,"tariffId":%[13]v,"dateOfBirthString":"%[3]v","firstName":"%[8]s","lastName":"%[9]s","email":"%[10]s","additionalFieldValue":"%[11]s","dateOfBirth":"%[3]v"}],"firstName":"%[8]s","lastName":"%[9]s","email":"%[10]s","dateOfBirth":"%[3]v","wantsNewsletter":false}`, gym.clientId, gym.shiftModelId, profile.DateOfBirth, profile.Address, profile.PostCode, profile.City, profile.Phone, profile.Name, profile.Surname, profile.Email, profile.USCid, shiftSelector, gym.tariffId)
-	fmt.Println(jsonStr)
 	client := http.Client{}
-	req, _ := http.NewRequest("POST", "https://backend.dr-plano.com/bookable", strings.NewReader(jsonStr))
+	url := "https://backend.dr-plano.com/bookable"
+	if !local && global.ApiEndpoint != "" {
+		if slot.State == "NOT_YET_BOOKABLE" {
+			url = global.ApiEndpoint + "/booking?scheduled=true"
+		} else {
+			url = global.ApiEndpoint + "/booking?scheduled=false"
+		}
+		jsonStr = fmt.Sprintf(`{"data": {"clientId":%[1]v,"shiftModelId":%[2]v,"shiftSelector":%[12]s,"desiredDate":null,"type":"booking","wantsNewsletter":false}, "extra": { "tariffId": %[13]v, "date": {"start": %[14]v, "end": %[15]v }, "gym": "%[16]v"}, "extra_user": {"dateOfBirthString":"%[3]s","streetAndHouseNumber":"%[4]s","postalCode":"%[5]s","city":"%[6]s","phoneMobile":"%[7]s","participants":[{"isBookingPerson":true,"tariffId":%[13]v,"dateOfBirthString":"%[3]v","firstName":"%[8]s","lastName":"%[9]s","email":"%[10]s","additionalFieldValue":"%[11]s","dateOfBirth":"%[3]v"}],"firstName":"%[8]s","lastName":"%[9]s","email":"%[10]s","dateOfBirth":"%[3]v" }} `, gym.clientId, gym.shiftModelId, profile.DateOfBirth, profile.Address, profile.PostCode, profile.City, profile.Phone, profile.Name, profile.Surname, profile.Email, profile.USCid, shiftSelector, gym.tariffId, slot.DateList[0].Start, slot.DateList[0].End, gym.name)
+	}
+	fmt.Println(jsonStr)
+
+	req, _ := http.NewRequest("POST", url, strings.NewReader(jsonStr))
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36")
 	response, err := client.Do(req)
@@ -196,7 +210,7 @@ func autoBook(start, end carbon.Carbon, gym BoulderStudio, profile Profile, sele
 		for _, selected := range selectedSlots {
 			for _, item := range recieved {
 				if item.DateList[0].Start == selected.DateList[0].Start && item.DateList[0].End == selected.DateList[0].End && item.State == "BOOKABLE" {
-					result := gym.bookSingle(profile, item)
+					result := gym.bookSingle(profile, item, true)
 					if result {
 						notify([]Slot{item}, gym)
 						booked = true

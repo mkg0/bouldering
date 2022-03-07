@@ -53,7 +53,8 @@ type Profile struct {
 }
 
 type persistData struct {
-	Profiles []Profile
+	Profiles    []Profile
+	ApiEndpoint string
 }
 
 var global = persistData{}

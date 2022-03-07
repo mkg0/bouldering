@@ -17,23 +17,43 @@ import (
 var errorOutput = color.New(color.FgRed)
 var successOutput = color.New(color.FgMagenta)
 
-var start = carbon.Now().StartOfDay()
-var end = carbon.Now().AddDays(dayCount).EndOfDay()
-
 func runCli() {
 	app := &cli.App{
 		Commands: []*cli.Command{
 			{
 				Name:  "book",
 				Usage: "Book a single slot from a gym",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:  "local",
+						Usage: "skip cloud booking",
+					},
+					&cli.StringFlag{
+						Name:  "offset",
+						Value: "0",
+						Usage: "Day offset for slot selection matrix",
+					},
+				},
 				Action: func(c *cli.Context) error {
+					isLocal := c.Bool("local")
+					offset := 0
 					if len(global.Profiles) == 0 {
 						errorOutput.Println(`There isn't any profile yet. Add one with "bouldering profile add"`)
 						return nil
 					}
+					if c.String("offset") != "" {
+						offset_, err := strconv.Atoi(c.String("offset"))
+						if err != nil {
+							errorOutput.Println("offset should be a number that stands for day")
+							return nil
+						}
+						offset = offset_
+					}
 					gym := chooseGym()
 
 					fmt.Println("Fetching slots...")
+					var start = carbon.Now().AddDays(offset).StartOfDay()
+					var end = carbon.Now().AddDays(offset).AddDays(dayCount).EndOfDay()
 					slots := gym.getSlots(start, end)
 					slotsToBook := askSlot(slots, start, end, false)
 					if len(slotsToBook) == 0 {
@@ -47,7 +67,7 @@ func runCli() {
 						errorOutput.Println("Oh no...")
 						return nil
 					}
-					result := gym.bookSingle(profile, slotsToBook[0])
+					result := gym.bookSingle(profile, slotsToBook[0], isLocal)
 					if result {
 						notify(slotsToBook, gym)
 					} else {
@@ -68,6 +88,7 @@ func runCli() {
 				},
 				Action: func(c *cli.Context) error {
 					interval := defaultRetryIntervalSeconds
+					offset := 0
 					if c.String("interval") != "" {
 						interval_, err := strconv.Atoi(c.String("interval"))
 						if err != nil {
@@ -76,6 +97,14 @@ func runCli() {
 						}
 						interval = interval_
 					}
+					if c.String("offset") != "" {
+						offset_, err := strconv.Atoi(c.String("offset"))
+						if err != nil {
+							errorOutput.Println("offset should be a number that stands for day")
+							return nil
+						}
+						offset = offset_
+					}
 
 					if len(global.Profiles) == 0 {
 						errorOutput.Println(`There isn't any profile yet. Add one with "bouldering profile add"`)
@@ -83,6 +112,8 @@ func runCli() {
 					}
 					gym := chooseGym()
 					fmt.Println("Fetching slots...")
+					var start = carbon.Now().AddDays(offset).StartOfDay()
+					var end = carbon.Now().AddDays(offset).AddDays(dayCount).EndOfDay()
 					slots := gym.getSlots(start, end)
 					slotsToBook := askSlot(slots, start, end, true)
 					if len(slotsToBook) == 0 {

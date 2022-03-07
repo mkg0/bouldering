@@ -98,7 +98,7 @@ func askSlot(slots []Slot, start, end carbon.Carbon, isAutoMode bool) []Slot {
 			if isAutoMode {
 				cols = append(cols, selectable.Cell{Content: time, Disabled: !disabled})
 			} else {
-				cols = append(cols, selectable.Cell{Content: time, Disabled: disabled})
+				cols = append(cols, selectable.Cell{Content: time, Disabled: disabled && slot.State != "NOT_YET_BOOKABLE"})
 			}
 		}
 		t.AddRow(cols)
