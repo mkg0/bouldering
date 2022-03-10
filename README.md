@@ -18,6 +18,7 @@ bouldering book
 bouldering auto-book
 bouldering enable-remote-booking
 bouldering disable-remote-booking
+bouldering config show
 ```
 
 [![asciicast](https://asciinema.org/a/HuQxtB0RHvBM5GFjk2UKXuuzd.svg)](https://asciinema.org/a/HuQxtB0RHvBM5GFjk2UKXuuzd)

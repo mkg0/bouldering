@@ -35,3 +35,7 @@ func Load(data interface{}) {
 	}
 	json.Unmarshal(file, data)
 }
+
+func GetFilePath() string {
+	return path + "temp_bouldering.tmp"
+}

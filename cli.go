@@ -220,6 +220,20 @@ func runCli() {
 					},
 				},
 			},
+			{
+				Name: "config",
+				Subcommands: []*cli.Command{
+					{
+						Name:  "show",
+						Usage: "Show config content and the file path",
+						Action: func(c *cli.Context) error {
+							fmt.Println(persist.GetFilePath())
+							PrettyPrint(global)
+							return nil
+						},
+					},
+				},
+			},
 		},
 	}
 
