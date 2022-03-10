@@ -27,7 +27,7 @@ func printTableOnResize(t *selectable.Table) {
 	}
 }
 
-func askSlot(slots []Slot, start, end carbon.Carbon, isAutoMode bool) []Slot {
+func askSlot(slots []Slot, start, end carbon.Carbon, isAutoMode bool, enableFuture bool) []Slot {
 	s, _ := tsize.GetSize()
 	t := selectable.Table{
 		Width:         s.Width,
@@ -98,7 +98,10 @@ func askSlot(slots []Slot, start, end carbon.Carbon, isAutoMode bool) []Slot {
 			if isAutoMode {
 				cols = append(cols, selectable.Cell{Content: time, Disabled: !disabled})
 			} else {
-				cols = append(cols, selectable.Cell{Content: time, Disabled: disabled && slot.State != "NOT_YET_BOOKABLE"})
+				if enableFuture && slot.State == "NOT_YET_BOOKABLE" {
+					disabled = false
+				}
+				cols = append(cols, selectable.Cell{Content: time, Disabled: disabled})
 			}
 		}
 		t.AddRow(cols)

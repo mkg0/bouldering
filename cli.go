@@ -35,7 +35,7 @@ func runCli() {
 					},
 				},
 				Action: func(c *cli.Context) error {
-					isLocal := c.Bool("local")
+					isLocal := isLocalBooking(c.Bool("local"))
 					offset := 0
 					if len(global.Profiles) == 0 {
 						errorOutput.Println(`There isn't any profile yet. Add one with "bouldering profile add"`)
@@ -55,7 +55,7 @@ func runCli() {
 					var start = carbon.Now().AddDays(offset).StartOfDay()
 					var end = carbon.Now().AddDays(offset).AddDays(dayCount).EndOfDay()
 					slots := gym.getSlots(start, end)
-					slotsToBook := askSlot(slots, start, end, false)
+					slotsToBook := askSlot(slots, start, end, false, !isLocal)
 					if len(slotsToBook) == 0 {
 						runCommand("clear")
 						errorOutput.Println("You should choose a slot to book")
@@ -115,7 +115,7 @@ func runCli() {
 					var start = carbon.Now().AddDays(offset).StartOfDay()
 					var end = carbon.Now().AddDays(offset).AddDays(dayCount).EndOfDay()
 					slots := gym.getSlots(start, end)
-					slotsToBook := askSlot(slots, start, end, true)
+					slotsToBook := askSlot(slots, start, end, true, false)
 					if len(slotsToBook) == 0 {
 						runCommand("clear")
 						errorOutput.Println("You should choose a slot to book")

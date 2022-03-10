@@ -179,7 +179,7 @@ func (gym *BoulderStudio) bookSingle(profile Profile, slot Slot, local bool) boo
 	var jsonStr = fmt.Sprintf(`{"clientId":%[1]v,"shiftModelId":%[2]v,"shiftSelector":%[12]s,"desiredDate":null,"dateOfBirthString":"%[3]s","streetAndHouseNumber":"%[4]s","postalCode":"%[5]s","city":"%[6]s","phoneMobile":"%[7]s","type":"booking","participants":[{"isBookingPerson":true,"tariffId":%[13]v,"dateOfBirthString":"%[3]v","firstName":"%[8]s","lastName":"%[9]s","email":"%[10]s","additionalFieldValue":"%[11]s","dateOfBirth":"%[3]v"}],"firstName":"%[8]s","lastName":"%[9]s","email":"%[10]s","dateOfBirth":"%[3]v","wantsNewsletter":false}`, gym.clientId, gym.shiftModelId, profile.DateOfBirth, profile.Address, profile.PostCode, profile.City, profile.Phone, profile.Name, profile.Surname, profile.Email, profile.USCid, shiftSelector, gym.tariffId)
 	client := http.Client{}
 	url := "https://backend.dr-plano.com/bookable"
-	if !local && global.ApiEndpoint != "" && global.RemoteBookingEnabled == true {
+	if !local {
 		if slot.State == "NOT_YET_BOOKABLE" {
 			url = global.ApiEndpoint + "/booking?scheduled=true"
 		} else {
