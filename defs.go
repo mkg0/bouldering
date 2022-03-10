@@ -53,8 +53,9 @@ type Profile struct {
 }
 
 type persistData struct {
-	Profiles    []Profile
-	ApiEndpoint string
+	Profiles             []Profile
+	ApiEndpoint          string
+	RemoteBookingEnabled bool
 }
 
 var global = persistData{}

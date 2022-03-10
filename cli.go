@@ -78,12 +78,12 @@ func runCli() {
 			},
 			{
 				Name:  "auto-book",
-				Usage: "Auto book first slot that's available from selecteds",
+				Usage: "Continuously try to book the first slot that's available from selected slots(local only) ",
 				Flags: []cli.Flag{
 					&cli.StringFlag{
 						Name:  "interval",
 						Value: "10",
-						Usage: "Interval for attemting another booking",
+						Usage: "Interval for each booking attempt",
 					},
 				},
 				Action: func(c *cli.Context) error {
@@ -133,6 +133,35 @@ func runCli() {
 					}
 
 					autoBook(start, end, gym, profile, slotsToBook, interval)
+					return nil
+				},
+			},
+			{
+				Name:  "enable-remote-booking",
+				Usage: "Enables scheduled future bookings(later than one week) and telegram bot features",
+				Action: func(c *cli.Context) error {
+					value := &survey.Input{
+						Message: "What is the endpoint for API?",
+					}
+					var result string
+					err := survey.AskOne(value, &result)
+					if err != nil {
+						fmt.Println(err.Error())
+						return nil
+					}
+					global.ApiEndpoint = result
+					global.RemoteBookingEnabled = true
+					persist.Save(&global)
+					fmt.Println(result)
+					return nil
+				},
+			},
+			{
+				Name:  "disable-remote-booking",
+				Usage: "Returns back to local booking",
+				Action: func(c *cli.Context) error {
+					global.RemoteBookingEnabled = false
+					persist.Save(&global)
 					return nil
 				},
 			},
