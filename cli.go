@@ -28,6 +28,10 @@ func runCli() {
 						Name:  "local",
 						Usage: "skip cloud booking",
 					},
+					&cli.BoolFlag{
+						Name:  "dry-run",
+						Usage: "show the booking without an actual booking",
+					},
 					&cli.StringFlag{
 						Name:  "offset",
 						Value: "0",
@@ -36,6 +40,8 @@ func runCli() {
 				},
 				Action: func(c *cli.Context) error {
 					isLocal := isLocalBooking(c.Bool("local"))
+					isDryRun := isLocalBooking(c.Bool("dry-run"))
+
 					offset := 0
 					if len(global.Profiles) == 0 {
 						errorOutput.Println(`There isn't any profile yet. Add one with "bouldering profile add"`)
@@ -65,6 +71,11 @@ func runCli() {
 					confirmation := confirm(slotsToBook, gym, profile, "Would you like to book above slot(s)?")
 					if confirmation == false {
 						errorOutput.Println("Oh no...")
+						return nil
+					}
+					if isDryRun {
+						notify(slotsToBook, gym)
+						errorOutput.Println("Booking call skipped due to dry run")
 						return nil
 					}
 					result := gym.bookSingle(profile, slotsToBook[0], isLocal)
